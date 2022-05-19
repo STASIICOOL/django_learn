@@ -2,6 +2,9 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import pre_save, post_save, pre_delete, post_delete
 from django.dispatch import receiver
+from django.db import models
+from django.utils import timezone
+from django.contrib.auth.models import (AbstractBaseUser, PermissionsMixin)
 
 # Create your models here.
 
@@ -24,7 +27,7 @@ class Country(models.Model):
 
 class City(models.Model):
     name = models.CharField(max_length=100)
-    country = models.ForeignKey(Country, on_delete=models.DO_NOTHING)
+    country = models.ForeignKey(Country, on_delete=models.DO_NOTHING, related_name='cities')
     longitude = models.FloatField()
     latitude = models.FloatField()
 
@@ -46,4 +49,5 @@ def post_save_city(instance, **kwargs):
 def pre_dlete_city(instance, **kwargs):
     instance.country.cities_count -= 1
     print(f"City has been delete")
+
 
