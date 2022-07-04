@@ -105,7 +105,6 @@ class CountryDell(generics.RetrieveUpdateDestroyAPIView):
 
 
 class CityViewSet(viewsets.ModelViewSet):
-
     queryset = City.objects.all()
     serializer_class = CitySerializer
     filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
@@ -222,35 +221,3 @@ class GoogleView(APIView):
         response['access_token'] = str(token.access_token)
         response['refresh_token'] = str(token)
         return Response(response)
-
-class GoogleView(APIView):
-    def post(self, request):
-        payload = {'access_token': request.data.get("token")}  # validate the token
-        r = requests.get('https://www.googleapis.com/oauth2/v2/userinfo', params=payload)
-        data = json.loads(r.text)
-
-        if 'error' in data:
-            content = {'message': 'wrong google token / this google token is already expired.'}
-            return Response(content)
-
-        # create user if not exist
-        try:
-            user = User.objects.get(email=data['email'])
-        except User.DoesNotExist:
-            user = User()
-            user.username = data['email']
-            # provider random default password
-            user.password = make_password(BaseUserManager().make_random_password())
-            user.email = data['email']
-            user.save()
-
-        token = RefreshToken.for_user(user)  # generate token without username & password
-        response = {}
-        response['username'] = user.username
-        response['access_token'] = str(token.access_token)
-        response['refresh_token'] = str(token)
-        return Response(response)
-
-class UpdateCountry(APIView):
-    def chanched(self, request):
-        return
